@@ -1,0 +1,35 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: encor
+    command:
+      - --general-log=ON
+      - --general-log-file=/var/lib/mysql/general.log
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    environment:
+      SECRET_KEY: secret
+      ALLOWED_HOSTS: "*"
+      DATABASE_NAME: encor
+      DATABASE_USER: root
+      DATABASE_PASSWORD: ""
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+
+volumes:
+  mysql_data:

@@ -1,0 +1,113 @@
+@charset "utf-8";
+
+@import url("https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c");
+
+body {
+  font-family: "M PLUS Rounded 1c", sans-serif !important;
+}
+
+a {
+  text-decoration: none;
+  color: #c71585;
+}
+
+img {
+  text-align: right;
+  width: 400px;
+  height: 400px;
+  box-shadow: 5px 5px 5px #888888;
+}
+
+.line-section {
+  flex: 1;
+  background-color: #f5f5f5;
+}
+
+.cmodal {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 1em;
+  max-width: 250px;
+  position: relative;
+  background-color: #fff;
+  border: 3px solid #f0f0f0;
+  border-radius: 4px;
+}
+.modal__title {
+  margin-bottom: 0.5em;
+  align-self: flex-start;
+}
+.modal__title input[type="text"] {
+  width: 100px;
+}
+.modal__title label {
+  display: flex;
+  align-items: center;
+}
+.modal__color {
+  margin-bottom: 0.5em;
+  align-self: flex-start;
+}
+.modal__times {
+  margin-bottom: 2em;
+}
+.modal__times > * {
+  margin-bottom: 0.5em;
+}
+.modal__times > *:last-child {
+  margin-bottom: 0;
+}
+.modal__times label {
+  display: flex;
+  align-items: center;
+}
+
+.modal-action-buttons__button {
+  border: 2px solid #000;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.save {
+  color: #2c75ff;
+  border-color: #2c75ff;
+}
+.save:hover {
+  color: #fff;
+  background-color: #2c75ff;
+}
+
+.delete {
+  color: #dd1155;
+  border-color: #dd1155;
+}
+.delete:hover {
+  color: #fff;
+  background-color: #dd1155;
+}
+
+.close {
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(50%, -50%);
+  transition: 0.15s;
+}
+.close:hover {
+  opacity: 0.85;
+  background-color: transparent;
+}
+
+input[type="date"] {
+  padding: 0.5em 1em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-weight: bold;
+}

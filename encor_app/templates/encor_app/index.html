@@ -1,0 +1,25 @@
+{% extends 'encor_app/layout.html' %}
+
+{% load static %}
+
+{% block content %}
+       <center><h1>Encor</h1>
+        <br>
+        <div id="media-container"></div>
+        <p>{{title}}</p>
+        <p>Explanation : {{explanation}}</p>
+        
+        </center>
+
+    <script>
+        var media_type = "{{media_type}}";
+        var url = "{{url}}";
+        
+        var media_container = document.getElementById('media-container');
+        if(media_type == 'image'){
+			media_container.innerHTML = '<p><img src="' + url + '" alt="Astronomy Picture"></p>';
+		}else{
+            media_container.innerHTML = '<iframe width="560" height="315" src="' + url + '?loop=1&autoplay=1&mute=1&rel=0&modestbranding=1" frameborder="0" allowfullscreen></iframe>';
+        }
+    </script>
+{% endblock %}
