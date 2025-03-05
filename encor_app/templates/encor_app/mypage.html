@@ -1,0 +1,56 @@
+{% extends 'encor_app/layout.html' %}
+
+{% block title %}mypage{% endblock %}
+
+{% load static %}
+
+{% block content %}
+    <h1>my page</h1>
+    Hi <b>{{ user.username }}</b>
+
+    <div id="calendar"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.js"></script>
+    <script src="{% static 'encor_app/calendar.js' %}"></script>
+
+    <div class="cmodal" id="modal-template">
+    <div class="modal__title">
+    <label>タイトル : <input type="text" id="title" name="title"></label></div>
+
+    <div class="modal__times">
+    <label>開始時刻 : <input type="datetime-local" id="start" name="open_date"></label>
+    <label>終了時刻 : <input type="datetime-local" id="end" name="close_date"></label></div>
+
+    <div class="modal__color">
+    <label>背景色 : <input type="color" id="color"></label></div>
+
+    <div class="modal__location">
+    <label>場所 : <input type="text" id="location" name="location"></label></div>
+
+    <div class="modal__message">
+    <label>コメント : <input type="text" id="message" name="message"></label></div>
+
+    <div class="modal-action-buttons">
+    <button class="modal-action-buttons__button save" id="save">保存</button>
+    <button class="modal-action-buttons__button delete" id="delete">削除</button>
+    <button class="modal-action-buttons close material-icons" id="cancel">cancel</button>
+    </div>
+    </div>
+    <br>
+    <p>
+    <button id="copy-calendar-url" data-url="{% url 'user_calendar' user_id=request.user.id %}">カレンダーを共有</button>
+    </p>
+    <script>
+        document.getElementById('copy-calendar-url').addEventListener('click', function() {
+            var url = this.getAttribute('data-url');
+            navigator.clipboard.writeText(url).then(function() {
+                alert('URLがクリップボードにコピーされました: ' + url);
+            }).catch(function(err) {
+                alert('コピーに失敗しました: ' + err);
+            });
+        });
+    </script>
+
+    <!-- サインアウト -->
+{% endblock%}

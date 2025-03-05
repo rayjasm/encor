@@ -1,0 +1,48 @@
+# Pythonバイトコード
+__pycache__/
+*.py[cod]
+
+# 環境設定ファイル
+.env
+*.env
+
+# 秘密情報
+secrets/
+*.pem
+*.key
+
+# 仮想環境
+.venv/
+venv/
+env/
+env.bak/
+
+# コンパイル済みファイル
+*.so
+*.o
+
+# キャッシュ
+*.egg-info/
+dist/
+build/
+
+# ログファイル
+*.log
+
+# テスト結果
+coverage/
+*.cover
+*.xml
+*.html
+nosetests.xml
+pytest.xml
+.coverage
+
+# IDE設定
+.idea/
+.vscode/
+*.swp
+
+# その他の無視するファイル
+.DS_Store
+Thumbs.db

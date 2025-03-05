@@ -1,0 +1,15 @@
+{% extends 'encor_app/layout.html' %}
+
+{% block title %}plans_new{% endblock %}
+
+{% load static %}
+
+{% block content %}
+    <h1>Sign in</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign in</button>
+    </form>
+    <p><a href="{% url 'signup' %}">新規登録</a></p>
+{% endblock%}
