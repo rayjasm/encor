@@ -7,8 +7,10 @@ Preparation for your computer:<br>
 ```bash
 docker-compose exec django poetry run python manage.py migrate
 ```
-
 <br>
+```bash
+docker-compose exec django poetry run python manage.py makemigrations
+```
 <br>
 <br>
 memo for rayjasm :<br>
