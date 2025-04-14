@@ -4,12 +4,19 @@
 <br>
 Preparation for your computer:<br>
 
+(1)
 ```bash
 docker-compose exec django poetry run python manage.py migrate
 ```
-<br>
+
+(2)
 ```bash
 docker-compose exec django poetry run python manage.py makemigrations
+```
+
+(3)
+```bash
+docker-compose exec django poetry run python manage.py createsuperuser
 ```
 <br>
 <br>
