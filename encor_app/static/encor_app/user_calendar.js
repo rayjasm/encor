@@ -249,27 +249,30 @@ const registerEditModalEvent = (modal, arg) => {
 
 // モーダルに既存イベントを表示
 const updateToModal = (modal, data) => {
-  const start = modal.querySelector(start);
-  const end = modal.querySelector(end);
-  const title = modal.querySelector(title);
-  const color = modal.querySelector(color);
-  const location = modal.querySelector(location);
-  const message = modal.querySelector(message);
+  const title = modal.querySelector("#modal-title");
+  const start = modal.querySelector("#modal-start");
+  const end = modal.querySelector("#modal-end");
+  const location = modal.querySelector("#modal-location");
+  const message = modal.querySelector("#modal-message");
 
-  console.log("updateToModal()", data);
-  if (data !== undefined) {
-    console.log("if:", data.event.title); // これは呼べる
-    start.value = convertISOToDatetimeLocal(data.event.start);
-    end.value = convertISOToDatetimeLocal(data.event.end);
-    title.value = data.event.title; // こっちは呼べない
-    color.value = data.event.color;
-    location.value = data.event.location || "";
-    message.value = data.event.extendedProps.message || "";
-  } else {
-    console.log(data.startStr);
-    start.value = convertISOToDatetimeLocal(data.startStr);
-  }
+  const event = data.event;
+  title.textContent = event.title || "";
+  start.textContent = formatDatetime(event.start);
+  end.textContent = formatDatetime(event.end);
+  location.textContent = event.extendedProps.location || "";
+  message.textContent = event.extendedProps.message || "";
 };
+
+// Date を「YYYY/MM/DD HH:MM」形式の文字列に変換
+function formatDatetime(date) {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}/${month}/${day} ${hours}:${minutes}`;
+}
 
 // モダールに既存イベントを設定
 const setupModalData = (modal, data) => {
@@ -281,16 +284,18 @@ const setupModalData = (modal, data) => {
   const message = modal.querySelector("#message");
 
   console.log("setupModalData()", data);
-  if (data !== undefined) {
-    start.value = convertISOToDatetimeLocal(data.start);
-    end.value = convertISOToDatetimeLocal(data.end);
-    name.value = data.event.name;
-    color.value = data.color;
-    contact.value = data.contact;
-    message.value = data.message;
+  if (data.event !== undefined) {
+    // 既存イベントをクリックした場合
+    start.value = convertISOToDatetimeLocal(data.event.startStr);
+    end.value = convertISOToDatetimeLocal(data.event.endStr);
+    name.value = data.event.title || "";
+    color.value = data.event.color || "#000000";
+    contact.value = data.event.extendedProps.contact || "";
+    message.value = data.event.extendedProps.message || "";
   } else {
-    console.log(data.startStr);
+    // 空き日を選択した場合は選択範囲の開始・終了だけを入れる
     start.value = convertISOToDatetimeLocal(data.startStr);
+    end.value = convertISOToDatetimeLocal(data.endStr);
   }
 };
 
