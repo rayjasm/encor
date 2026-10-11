@@ -8,6 +8,40 @@
     <h1>my page</h1>
     Hi <b>{{ user.username }}</b>
 
+    <!-- 新着リクエスト一覧 -->
+    <section class="requests-panel" id="requests-panel">
+        <h2 class="requests-panel__heading">
+            新着リクエスト<span class="requests-panel__count" id="requests-count"></span>
+        </h2>
+        <p class="requests-panel__empty" id="requests-empty">新着リクエストはありません</p>
+        <ul class="requests-list" id="requests-list"></ul>
+    </section>
+
+    <!-- 新着リクエスト1件分の行テンプレート -->
+    <template id="request-row-template">
+        <li class="request-row">
+            <div class="request-row__body">
+                <div class="request-row__main">
+                    <span class="request-row__name"></span>
+                    <span class="request-row__time"></span>
+                </div>
+                <div class="request-row__sub">
+                    <span class="request-row__contact"></span>
+                    <span class="request-row__message"></span>
+                </div>
+                <div class="request-row__received"></div>
+            </div>
+            <div class="request-row__actions">
+                <select class="request-row__visibility" title="承諾後の公開設定">
+                    <option value="public">公開</option>
+                    <option value="private">非公開</option>
+                </select>
+                <button type="button" class="modal-action-buttons__button save request-row__accept">承諾</button>
+                <button type="button" class="modal-action-buttons__button delete request-row__decline">辞退</button>
+            </div>
+        </li>
+    </template>
+
     <div id="calendar"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

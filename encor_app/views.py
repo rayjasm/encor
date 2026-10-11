@@ -272,9 +272,10 @@ def offer_to_dict(offer):
 @login_required
 def api_offers(request):
     delete_expired_if_due()
+    # 新着一覧で使うため、受信日時の新しい順に返す
     offers = Offer.objects.filter(
         user=request.user, status=Offer.STATUS_PENDING
-    ).order_by("open_date")
+    ).order_by("-request_date", "-id")
     return JsonResponse({'offers': [offer_to_dict(o) for o in offers]})
 
 

@@ -121,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
           axios
             .get("/api/offers/")
             .then((response) => {
+              renderRequestsPanel(response.data.offers);
               const events = response.data.offers.map((o) => ({
                 id: `offer-${o.id}`,
                 start: o.start,
@@ -191,43 +192,103 @@ const initOfferModal = (data) => {
   // 承諾
   modal.querySelector("#offer-accept").addEventListener("click", (e) => {
     e.preventDefault();
-    axios
-      .post(`/api/offers/${props.offerId}/accept/`, {
-        visibility: visibility.value,
-      })
-      .then((response) => {
-        console.log("リクエストを承諾しました:", response.data);
-        modal.remove();
-        // オファーが消えて予定が増えるので両方のソースを取り直す
-        calendar.refetchEvents();
-      })
-      .catch((error) => {
-        console.error("承諾エラー:", error.response ? error.response.data : error);
-        alert("承諾に失敗しました");
-      });
+    acceptOffer(props.offerId, visibility.value).then(() => modal.remove());
   });
 
   // 辞退
   modal.querySelector("#offer-decline").addEventListener("click", (e) => {
     e.preventDefault();
-    if (!confirm("このリクエストを辞退しますか?")) return;
-    axios
-      .post(`/api/offers/${props.offerId}/decline/`)
-      .then((response) => {
-        console.log("リクエストを辞退しました:", response.data);
-        modal.remove();
-        event.remove();
-      })
-      .catch((error) => {
-        console.error("辞退エラー:", error.response ? error.response.data : error);
-        alert("辞退に失敗しました");
-      });
+    declineOffer(props.offerId).then((done) => {
+      if (done) modal.remove();
+    });
   });
 
   // 閉じる
   modal.querySelector("#offer-cancel").addEventListener("click", (e) => {
     e.preventDefault();
     modal.remove();
+  });
+};
+
+/* リクエストを承諾する(モーダル・一覧パネル共通) */
+const acceptOffer = (offerId, visibility) => {
+  return axios
+    .post(`/api/offers/${offerId}/accept/`, { visibility: visibility })
+    .then((response) => {
+      console.log("リクエストを承諾しました:", response.data);
+      // リクエストが消えて予定が増えるので、カレンダーと一覧を取り直す
+      calendar.refetchEvents();
+      return true;
+    })
+    .catch((error) => {
+      console.error("承諾エラー:", error.response ? error.response.data : error);
+      alert("承諾に失敗しました");
+      return false;
+    });
+};
+
+/* リクエストを辞退する(モーダル・一覧パネル共通)。キャンセル時は false */
+const declineOffer = (offerId) => {
+  if (!confirm("このリクエストを辞退しますか?")) {
+    return Promise.resolve(false);
+  }
+  return axios
+    .post(`/api/offers/${offerId}/decline/`)
+    .then((response) => {
+      console.log("リクエストを辞退しました:", response.data);
+      calendar.refetchEvents();
+      return true;
+    })
+    .catch((error) => {
+      console.error("辞退エラー:", error.response ? error.response.data : error);
+      alert("辞退に失敗しました");
+      return false;
+    });
+};
+
+/* 新着リクエスト一覧パネルの描画 */
+const renderRequestsPanel = (offers) => {
+  const list = document.getElementById("requests-list");
+  const count = document.getElementById("requests-count");
+  const empty = document.getElementById("requests-empty");
+  const template = document.getElementById("request-row-template");
+  if (!list || !template) return;
+
+  list.innerHTML = "";
+  count.textContent = offers.length > 0 ? `${offers.length}件` : "";
+  empty.style.display = offers.length > 0 ? "none" : "";
+
+  offers.forEach((offer) => {
+    const row = template.content.firstElementChild.cloneNode(true);
+    const start = new Date(offer.start);
+    const end = new Date(offer.end);
+
+    // 送信者が入力した文字列なので textContent で入れる(HTML として解釈させない)
+    row.querySelector(".request-row__name").textContent = offer.name || "(名前なし)";
+    row.querySelector(".request-row__time").textContent =
+      `${formatDatetime(start)} 〜 ${formatDatetime(end)}`;
+    row.querySelector(".request-row__contact").textContent =
+      offer.contact ? `連絡先: ${offer.contact}` : "";
+    row.querySelector(".request-row__message").textContent =
+      offer.message ? `コメント: ${offer.message}` : "";
+    row.querySelector(".request-row__received").textContent =
+      `受信: ${formatDatetime(new Date(offer.request_date))}`;
+
+    // 行本体をクリックするとカレンダーがその日に移動する
+    row.querySelector(".request-row__body").addEventListener("click", () => {
+      calendar.gotoDate(start);
+      document.getElementById("calendar").scrollIntoView({ behavior: "smooth" });
+    });
+
+    const visibility = row.querySelector(".request-row__visibility");
+    row.querySelector(".request-row__accept").addEventListener("click", () => {
+      acceptOffer(offer.id, visibility.value);
+    });
+    row.querySelector(".request-row__decline").addEventListener("click", () => {
+      declineOffer(offer.id);
+    });
+
+    list.appendChild(row);
   });
 };
 

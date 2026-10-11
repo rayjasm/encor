@@ -107,6 +107,14 @@ class OfferMypageTest(CalendarTestBase):
         self.assertEqual(offers[0]["name"], "友人A")
         self.assertEqual(offers[0]["contact"], "090-0000-0000")
 
+    def test_offers_api_returns_newest_first(self):
+        first = self.make_offer(name="先")
+        second = self.make_offer(name="後")
+        self.client.login(username="owner", password="pw")
+        offers = self.client.get(reverse("api_offers")).json()["offers"]
+        self.assertEqual([o["id"] for o in offers], [second.id, first.id])
+        self.assertIn("request_date", offers[0])
+
     def test_accept_creates_public_plan_by_default(self):
         offer = self.make_offer()
         self.client.login(username="owner", password="pw")
