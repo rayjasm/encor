@@ -82,7 +82,15 @@ document.addEventListener("DOMContentLoaded", function () {
       meridiem: false,
     },
     eventSources: [
-      /* 日本の祝日 */
+      /* 日本の祝日(Google の公開カレンダー)
+         下の API キーはブラウザ用のキーで、意図的にソースコードに含めている。
+         - 用途は Google が公開している「日本の祝日」カレンダーの読み取りだけで、
+           このキーで個人のカレンダーなど非公開データにはアクセスできない
+         - FullCalendar がブラウザから直接 Google Calendar API を呼ぶ仕組みのため、
+           キーはクライアント側に置く必要があり、閲覧者には必ず見える(隠す手段がない)
+         - 不正利用を防ぐため、Google Cloud Console 側で HTTP リファラー制限と
+           利用 API の制限(Calendar API のみ)をかけて運用する
+      */
       {
         googleCalendarApiKey: "AIzaSyCzakJHMWzQNPxRObFBbgS5Btntz4pcsK8",
         googleCalendarId: "japanese__ja@holiday.calendar.google.com",
@@ -330,6 +338,23 @@ const calcModalPosition = (e) => {
 const removeAlreadyModal = () => {
   document.querySelectorAll("#modal").forEach((modal) => modal.remove());
 };
+
+/* モーダルの外側をクリック、または Esc キーで閉じる */
+// mousedown を使うのは、モーダルを開くクリック自体(mouseup 以降に生成)で
+// 閉じてしまわないようにするため
+document.addEventListener("mousedown", (e) => {
+  const modal = document.getElementById("modal");
+  if (modal && !modal.contains(e.target)) {
+    removeAlreadyModal();
+    calendar.unselect();
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.getElementById("modal")) {
+    removeAlreadyModal();
+    calendar.unselect();
+  }
+});
 
 // モーダル登録処理
 const registerEditModalEvent = (modal, arg) => {
