@@ -1,12 +1,16 @@
 import json
-from datetime import timedelta
+from datetime import date, datetime, timedelta
+from io import StringIO
 
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from .models import Offer, Plan
+from .retention import delete_expired, delete_expired_if_due, display_range_start
 
 
 class SampleTestCase(TestCase):
@@ -164,3 +168,72 @@ class OfferMypageTest(CalendarTestBase):
         self.client.login(username="owner", password="pw")
         self.assertEqual(self.client.get(reverse("api_offer_accept", args=[offer.id])).status_code, 405)
 
+
+class RetentionTest(CalendarTestBase):
+    """表示期間(今日から1年前)を過ぎた予定・リクエストの削除"""
+
+    def setUp(self):
+        super().setUp()
+        cache.clear()
+        self.cutoff = display_range_start()
+        # 期限切れ: 1年前より前に終了
+        self.old_plan = Plan.objects.create(
+            user=self.owner, title="古い予定",
+            open_date=self.cutoff - timedelta(days=2), close_date=self.cutoff - timedelta(days=1),
+        )
+        self.old_offer = self.make_offer(
+            open_date=self.cutoff - timedelta(days=2), close_date=self.cutoff - timedelta(days=1),
+        )
+        # 表示範囲内: 1年前の直後に終了
+        self.recent_plan = Plan.objects.create(
+            user=self.owner, title="境界の予定",
+            open_date=self.cutoff - timedelta(hours=1), close_date=self.cutoff + timedelta(hours=1),
+        )
+        self.recent_offer = self.make_offer(
+            open_date=self.cutoff, close_date=self.cutoff + timedelta(hours=1),
+        )
+
+    def test_display_range_start_is_one_year_ago_midnight(self):
+        start = display_range_start(today=date(2026, 10, 11))
+        self.assertEqual(timezone.localtime(start), timezone.make_aware(datetime(2025, 10, 11, 0, 0)))
+
+    def test_display_range_start_handles_leap_day(self):
+        start = display_range_start(today=date(2028, 2, 29))
+        self.assertEqual(timezone.localtime(start).date(), date(2027, 2, 28))
+
+    def test_delete_expired_removes_only_expired_rows(self):
+        plans, offers = delete_expired()
+        self.assertEqual((plans, offers), (1, 1))
+        self.assertFalse(Plan.objects.filter(id=self.old_plan.id).exists())
+        self.assertFalse(Offer.objects.filter(id=self.old_offer.id).exists())
+        self.assertTrue(Plan.objects.filter(id=self.recent_plan.id).exists())
+        self.assertTrue(Offer.objects.filter(id=self.recent_offer.id).exists())
+
+    def test_delete_expired_if_due_runs_once_per_interval(self):
+        self.assertEqual(delete_expired_if_due(), (1, 1))
+        # 2回目は抑制されて実行されない
+        self.assertIsNone(delete_expired_if_due())
+
+    def test_public_calendar_load_triggers_cleanup(self):
+        res = self.client.get(reverse("get_plans_to_calendar", args=[self.owner.id]))
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(Plan.objects.filter(id=self.old_plan.id).exists())
+        self.assertFalse(Offer.objects.filter(id=self.old_offer.id).exists())
+
+    def test_mypage_apis_trigger_cleanup(self):
+        self.client.login(username="owner", password="pw")
+        self.client.get(reverse("api_offers"))
+        self.assertFalse(Offer.objects.filter(id=self.old_offer.id).exists())
+        self.assertFalse(Plan.objects.filter(id=self.old_plan.id).exists())
+
+    def test_management_command(self):
+        out = StringIO()
+        call_command("delete_expired", "--dry-run", stdout=out)
+        self.assertIn("予定 1 件、リクエスト 1 件が削除対象", out.getvalue())
+        self.assertTrue(Plan.objects.filter(id=self.old_plan.id).exists())
+
+        out = StringIO()
+        call_command("delete_expired", stdout=out)
+        self.assertIn("予定 1 件、リクエスト 1 件を削除しました", out.getvalue())
+        self.assertFalse(Plan.objects.filter(id=self.old_plan.id).exists())
+        self.assertFalse(Offer.objects.filter(id=self.old_offer.id).exists())

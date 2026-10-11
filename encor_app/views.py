@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 # モデルとフォーム
 from .models import Plan, Offer
 from .forms import PlanForm, SignupForm, OfferForm
+from .retention import delete_expired_if_due
 
 def index(request):
     current_user = request.user
@@ -72,6 +73,7 @@ def api_plans(request):
         location = request.GET.get("location")
         message = request.GET.get("message")
         
+        delete_expired_if_due()
         events = Plan.objects.filter(user=request.user)
         return JsonResponse({'events': [plan_to_dict(e) for e in events]})
     
@@ -177,6 +179,7 @@ def user_calendar(request, user_id):
 # リクエスト受付ページへのplanの表示
 def get_plans_to_calendar(request, user_id):
     user = User.objects.get(id=user_id)
+    delete_expired_if_due()
     # 公開カレンダーには「公開」の予定だけを表示する
     events = Plan.objects.filter(user=user, visibility=Plan.VISIBILITY_PUBLIC)
     return JsonResponse({'events': [plan_to_dict(e) for e in events]})
@@ -268,6 +271,7 @@ def offer_to_dict(offer):
 # 自分宛ての未回答オファー一覧
 @login_required
 def api_offers(request):
+    delete_expired_if_due()
     offers = Offer.objects.filter(
         user=request.user, status=Offer.STATUS_PENDING
     ).order_by("open_date")
