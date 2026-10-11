@@ -325,11 +325,9 @@ const calcModalPosition = (e) => {
   };
 };
 
+// 開いているモーダルをすべて閉じる(同時に開くのは常に1つだけにする)
 const removeAlreadyModal = () => {
-  const modal = document.getElementById("modal");
-  if (modal) {
-    modal.remove();
-  }
+  document.querySelectorAll("#modal").forEach((modal) => modal.remove());
 };
 
 // モーダル登録処理
