@@ -3,6 +3,11 @@ axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 axios.defaults.xsrfCookieName = "csrftoken";
 
 let calendar;
+
+/* 空き日をクリックしたときの初期値: 9:00 開始、2時間の枠 */
+const DEFAULT_START_HOUR = 9;
+const DEFAULT_DURATION_HOURS = 2;
+
 const pathParts = window.location.pathname.split("/");
 const userId = pathParts[pathParts.length - 2];
 
@@ -319,10 +324,26 @@ const setupModalData = (modal, data) => {
     contact.value = data.event.extendedProps.contact || "";
     message.value = data.event.extendedProps.message || "";
   } else {
-    // 空き日を選択した場合は選択範囲の開始・終了だけを入れる
-    start.value = convertISOToDatetimeLocal(data.startStr);
-    end.value = convertISOToDatetimeLocal(data.endStr);
+    // 空き日を選択した場合: その日の 9:00 から 2 時間を初期値にする
+    const startDate = new Date(data.start); // 選択日の 0:00(ローカル時刻)
+    startDate.setHours(DEFAULT_START_HOUR, 0, 0, 0);
+    const endDate = new Date(
+      startDate.getTime() + DEFAULT_DURATION_HOURS * 60 * 60 * 1000
+    );
+    start.value = convertISOToDatetimeLocal(startDate);
+    end.value = convertISOToDatetimeLocal(endDate);
   }
+
+  // 開始時刻を変えたら、時間幅を保ったまま終了時刻もずらす
+  let lastStart = new Date(start.value);
+  start.addEventListener("change", () => {
+    const newStart = new Date(start.value);
+    const currentEnd = new Date(end.value);
+    if (isNaN(newStart) || isNaN(currentEnd) || isNaN(lastStart)) return;
+    const duration = currentEnd - lastStart;
+    end.value = convertISOToDatetimeLocal(new Date(newStart.getTime() + duration));
+    lastStart = newStart;
+  });
 };
 
 function convertISOToDatetimeLocal(isoString) {

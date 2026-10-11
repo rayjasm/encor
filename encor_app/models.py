@@ -45,7 +45,7 @@ class Offer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     open_date = models.DateTimeField(null=False, blank=False)
     close_date = models.DateTimeField(null=False, blank=False)
-    # 予定の名前(例: 野球、水族館)。送信者の氏名ではない
+    # 予定の名前(例: 街歩き、アフタヌーンティー)。送信者の氏名ではない
     name = models.CharField(max_length=10, null=False, blank=False)
     color = models.CharField(max_length=10, null=True, blank=True)
     message = models.CharField(max_length=30, null=True, blank=True)    
