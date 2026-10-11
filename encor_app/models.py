@@ -22,7 +22,7 @@ class Plan(models.Model):
         max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_PUBLIC
     )
     # リクエストを承諾して作られた予定は、元のリクエストを参照する
-    # (送信者の名前・連絡先・コメントをマイページで確認できるようにするため)
+    # (送信者の連絡先などをマイページで確認できるようにするため)
     offer = models.OneToOneField(
         "Offer", null=True, blank=True, on_delete=models.SET_NULL, related_name="plan"
     )
@@ -45,6 +45,7 @@ class Offer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     open_date = models.DateTimeField(null=False, blank=False)
     close_date = models.DateTimeField(null=False, blank=False)
+    # 予定の名前(例: 野球、水族館)。送信者の氏名ではない
     name = models.CharField(max_length=10, null=False, blank=False)
     color = models.CharField(max_length=10, null=True, blank=True)
     message = models.CharField(max_length=30, null=True, blank=True)    

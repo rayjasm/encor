@@ -268,7 +268,7 @@ const renderRequestsPanel = (offers) => {
     const end = new Date(offer.end);
 
     // 送信者が入力した文字列なので textContent で入れる(HTML として解釈させない)
-    row.querySelector(".request-row__name").textContent = offer.name || "(名前なし)";
+    row.querySelector(".request-row__name").textContent = offer.name || "(予定の名前なし)";
     row.querySelector(".request-row__time").textContent =
       `${formatDatetime(start)} 〜 ${formatDatetime(end)}`;
     row.querySelector(".request-row__contact").textContent =
@@ -443,7 +443,7 @@ const setupModalData = (modal, data) => {
 };
 
 // 承諾したリクエストの送信者の連絡先を編集モーダルに表示する
-// (名前とコメントは予定のタイトル・コメント欄に入っているので表示しない)
+// (予定の名前とコメントはタイトル・コメント欄に入っているので表示しない)
 const showRequestInfo = (modal, request) => {
   const box = modal.querySelector("#request-info");
   if (!box || !request) return;
