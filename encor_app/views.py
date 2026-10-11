@@ -8,6 +8,7 @@ from django.middleware.csrf import get_token
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.http import require_POST
 
 # モデルとフォーム
 from .models import Plan, Offer
@@ -39,6 +40,26 @@ def plans_new(request):
         
         return render(request, 'encor_app/plans_new.html', {'form': plan_form})
 
+def plan_to_dict(plan):
+    return {
+        "id": plan.id,
+        "start": plan.open_date.isoformat(),
+        "end": plan.close_date.isoformat(),
+        "title": plan.title,
+        "color": plan.color,
+        "location": plan.location,
+        "message": plan.message,
+        "visibility": plan.visibility,
+    }
+
+
+def parse_visibility(value):
+    """フォームから来た値を Plan.visibility の値に正規化する"""
+    if value == Plan.VISIBILITY_PRIVATE:
+        return Plan.VISIBILITY_PRIVATE
+    return Plan.VISIBILITY_PUBLIC
+
+
 # CRUD
 @login_required
 def api_plans(request):
@@ -52,21 +73,7 @@ def api_plans(request):
         message = request.GET.get("message")
         
         events = Plan.objects.filter(user=request.user)
-        
-        plans_list = []
-        for event in events:
-            plans_list.append(
-                {
-                    "id": event.id,
-                    "start": event.open_date.isoformat(),
-                    "end": event.close_date.isoformat(),
-                    "title": event.title,
-                    "color": event.color,
-                    "location": event.location,
-                    "message": event.message,
-                }
-            )
-        return JsonResponse({'events': plans_list})
+        return JsonResponse({'events': [plan_to_dict(e) for e in events]})
     
     # 新規登録
     elif request.method == "POST":
@@ -77,6 +84,7 @@ def api_plans(request):
         color = datas["color"]
         location = datas["location"]
         message = datas["message"]
+        visibility = parse_visibility(datas.get("visibility"))
 
         # ISO 8601形式の文字列をdatetimeオブジェクトに変換
         open_date = datetime.fromisoformat(start)
@@ -90,6 +98,7 @@ def api_plans(request):
             color=str(color),
             location=str(location),
             message=str(message),
+            visibility=visibility,
         )
         event.save()
             
@@ -119,6 +128,8 @@ def api_plans(request):
         event.color = color
         event.location = location
         event.message = message
+        if "visibility" in datas:
+            event.visibility = parse_visibility(datas.get("visibility"))
         
         event.save()
         
@@ -166,22 +177,9 @@ def user_calendar(request, user_id):
 # リクエスト受付ページへのplanの表示
 def get_plans_to_calendar(request, user_id):
     user = User.objects.get(id=user_id)
-    events = Plan.objects.filter(user=user)
-
-    plans_list = []
-    for event in events:
-        plans_list.append(
-            {
-                "id" : event.id,
-                "start": event.open_date.isoformat(),
-                "end": event.close_date.isoformat(),
-                "title": event.title,
-                "color": event.color,
-                "location": event.location,
-                "message": event.message,
-            }
-        )
-    return JsonResponse({'events': plans_list})
+    # 公開カレンダーには「公開」の予定だけを表示する
+    events = Plan.objects.filter(user=user, visibility=Plan.VISIBILITY_PUBLIC)
+    return JsonResponse({'events': [plan_to_dict(e) for e in events]})
 
 # リクエスト送信フォーム
 def offers_new(request):
@@ -248,3 +246,70 @@ def send_offer_user_calendar(request, user_id):
     
     elif request.method == "GET":
         return JsonResponse({})
+
+
+# ---- マイページでのオファー確認・回答 ----
+
+def offer_to_dict(offer):
+    return {
+        "id": offer.id,
+        "start": offer.open_date.isoformat(),
+        "end": offer.close_date.isoformat(),
+        "title": f"【リクエスト】{offer.name}",
+        "name": offer.name,
+        "color": offer.color,
+        "contact": offer.contact,
+        "message": offer.message,
+        "status": offer.status,
+        "request_date": offer.request_date.isoformat(),
+    }
+
+
+# 自分宛ての未回答オファー一覧
+@login_required
+def api_offers(request):
+    offers = Offer.objects.filter(
+        user=request.user, status=Offer.STATUS_PENDING
+    ).order_by("open_date")
+    return JsonResponse({'offers': [offer_to_dict(o) for o in offers]})
+
+
+# オファーを承諾して予定として確定する
+@login_required
+@require_POST
+def api_offer_accept(request, offer_id):
+    try:
+        offer = Offer.objects.get(id=offer_id, user=request.user)
+    except Offer.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Offer not found'}, status=404)
+    if offer.status != Offer.STATUS_PENDING:
+        return JsonResponse({'status': 'error', 'message': 'Offer already answered'}, status=409)
+
+    try:
+        datas = json.loads(request.body) if request.body else {}
+    except json.JSONDecodeError:
+        datas = {}
+    visibility = parse_visibility(datas.get("visibility"))
+
+    plan = offer.accept(visibility=visibility)
+    return JsonResponse({
+        'status': 'success',
+        'message': 'Offer accepted',
+        'offer_id': offer.id,
+        'plan': plan_to_dict(plan),
+    })
+
+
+# オファーを辞退する
+@login_required
+@require_POST
+def api_offer_decline(request, offer_id):
+    try:
+        offer = Offer.objects.get(id=offer_id, user=request.user)
+    except Offer.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Offer not found'}, status=404)
+    if offer.status != Offer.STATUS_PENDING:
+        return JsonResponse({'status': 'error', 'message': 'Offer already answered'}, status=409)
+
+    offer.decline()
+    return JsonResponse({'status': 'success', 'message': 'Offer declined', 'offer_id': offer.id})

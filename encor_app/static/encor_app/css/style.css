@@ -122,3 +122,42 @@ input[type="date"] {
   border-radius: 4px;
   font-weight: bold;
 }
+
+/* 公開設定プルダウン */
+.modal__visibility {
+  margin-bottom: 1em;
+  align-self: flex-start;
+}
+.modal__visibility select {
+  padding: 0.25em 0.5em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* お誘い(オファー)モーダル */
+.omodal {
+  max-width: 300px;
+}
+.omodal__heading {
+  margin: 0 0 0.75em;
+  font-size: 1.1em;
+  color: #c71585;
+}
+.omodal .modal__field {
+  align-self: flex-start;
+  margin-bottom: 0.4em;
+}
+.omodal .modal__field label {
+  font-weight: bold;
+}
+
+/* カレンダー上のオファー表示(点線枠で予定と区別) */
+.fc .offer-event {
+  border: 2px dashed #c71585 !important;
+  background-color: #fff0f7 !important;
+  color: #c71585 !important;
+}
+.fc .offer-event .fc-event-title,
+.fc .offer-event .fc-event-time {
+  color: #c71585;
+}

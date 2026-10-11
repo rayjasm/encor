@@ -13,4 +13,8 @@ urlpatterns = [
     path("get/plans/<int:user_id>/", views.get_plans_to_calendar, name='get_plans_to_calendar'),
     path("offers/new/", views.offers_new, name='offers_new'),
     path("api/offers/<int:user_id>/", views.send_offer_user_calendar, name="send_offer_user_calendar"),
+    # マイページ用: 自分宛てオファーの一覧と回答
+    path("api/offers/", views.api_offers, name="api_offers"),
+    path("api/offers/<int:offer_id>/accept/", views.api_offer_accept, name="api_offer_accept"),
+    path("api/offers/<int:offer_id>/decline/", views.api_offer_decline, name="api_offer_decline"),
 ]

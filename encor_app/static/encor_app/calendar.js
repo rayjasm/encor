@@ -46,10 +46,6 @@ document.addEventListener("DOMContentLoaded", function () {
       center: "title",
       right: "dayGridMonth,dayGridWeek,dayGridDay",
     },
-    eventSources: {
-      googleCalendarApiKey: "AIzaSyCzakJHMWzQNPxRObFBbgS5Btntz4pcsK8",
-      googleCalendarId: "japanese__ja@holiday.calendar.google.com",
-    },
     validRange: {
       start: startDate,
       end: endDate,
@@ -65,7 +61,16 @@ document.addEventListener("DOMContentLoaded", function () {
       initEditModal(arg);
     },
     eventClick: (arg) => {
-      console.log(arg);
+      // 祝日(Google カレンダー由来)はクリックしても何もしない
+      if (arg.event.url) {
+        arg.jsEvent.preventDefault();
+        return;
+      }
+      // リクエスト(オファー)は承諾/辞退用のモーダルを開く
+      if (arg.event.extendedProps.type === "offer") {
+        initOfferModal(arg);
+        return;
+      }
       initEditModal(arg);
     },
 
@@ -75,19 +80,71 @@ document.addEventListener("DOMContentLoaded", function () {
       minute: "2-digit",
       meridiem: false,
     },
-    events: function (info, successCallback, failureCallback) {
-      axios
-        .get("/api/plans/")
-        .then((response) => {
-          const events = response.data.events;
-          console.log("取得したイベントデータ:", events);
-          calendar.removeAllEvents();
-          successCallback(events);
-        })
-        .catch((error) => {
-          console.error("Error fetching events:", error);
-        });
-    },
+    eventSources: [
+      /* 日本の祝日 */
+      {
+        googleCalendarApiKey: "AIzaSyCzakJHMWzQNPxRObFBbgS5Btntz4pcsK8",
+        googleCalendarId: "japanese__ja@holiday.calendar.google.com",
+      },
+      /* 自分の予定 */
+      {
+        id: "plans",
+        events: function (info, successCallback, failureCallback) {
+          axios
+            .get("/api/plans/")
+            .then((response) => {
+              const events = response.data.events.map((e) => ({
+                id: e.id,
+                start: e.start,
+                end: e.end,
+                title: e.title,
+                color: e.color,
+                extendedProps: {
+                  type: "plan",
+                  location: e.location,
+                  message: e.message,
+                  visibility: e.visibility,
+                },
+              }));
+              successCallback(events);
+            })
+            .catch((error) => {
+              console.error("Error fetching events:", error);
+              failureCallback(error);
+            });
+        },
+      },
+      /* 届いているリクエスト(未回答のみ) */
+      {
+        id: "offers",
+        events: function (info, successCallback, failureCallback) {
+          axios
+            .get("/api/offers/")
+            .then((response) => {
+              const events = response.data.offers.map((o) => ({
+                id: `offer-${o.id}`,
+                start: o.start,
+                end: o.end,
+                title: o.title,
+                classNames: ["offer-event"],
+                editable: false,
+                extendedProps: {
+                  type: "offer",
+                  offerId: o.id,
+                  name: o.name,
+                  contact: o.contact,
+                  message: o.message,
+                },
+              }));
+              successCallback(events);
+            })
+            .catch((error) => {
+              console.error("Error fetching offers:", error);
+              failureCallback(error);
+            });
+        },
+      },
+    ],
   });
 
   calendar.render();
@@ -109,6 +166,69 @@ const initEditModal = (data) => {
   setupModalData(modal, data);
 
   registerEditModalEvent(modal, data);
+};
+
+/* リクエスト(オファー)の確認モーダル */
+const initOfferModal = (data) => {
+  removeAlreadyModal();
+  const defModal = document.getElementById("offer-modal-template");
+  const modal = defModal.cloneNode(true);
+  modal.id = "modal";
+
+  setupModalPosition(modal, data.jsEvent);
+  document.body.appendChild(modal);
+
+  const event = data.event;
+  const props = event.extendedProps;
+  modal.querySelector("#offer-name").textContent = props.name || "";
+  modal.querySelector("#offer-start").textContent = formatDatetime(event.start);
+  modal.querySelector("#offer-end").textContent = formatDatetime(event.end);
+  modal.querySelector("#offer-contact").textContent = props.contact || "";
+  modal.querySelector("#offer-message").textContent = props.message || "";
+
+  const visibility = modal.querySelector("#offer-visibility");
+
+  // 承諾
+  modal.querySelector("#offer-accept").addEventListener("click", (e) => {
+    e.preventDefault();
+    axios
+      .post(`/api/offers/${props.offerId}/accept/`, {
+        visibility: visibility.value,
+      })
+      .then((response) => {
+        console.log("リクエストを承諾しました:", response.data);
+        modal.remove();
+        // オファーが消えて予定が増えるので両方のソースを取り直す
+        calendar.refetchEvents();
+      })
+      .catch((error) => {
+        console.error("承諾エラー:", error.response ? error.response.data : error);
+        alert("承諾に失敗しました");
+      });
+  });
+
+  // 辞退
+  modal.querySelector("#offer-decline").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (!confirm("このリクエストを辞退しますか?")) return;
+    axios
+      .post(`/api/offers/${props.offerId}/decline/`)
+      .then((response) => {
+        console.log("リクエストを辞退しました:", response.data);
+        modal.remove();
+        event.remove();
+      })
+      .catch((error) => {
+        console.error("辞退エラー:", error.response ? error.response.data : error);
+        alert("辞退に失敗しました");
+      });
+  });
+
+  // 閉じる
+  modal.querySelector("#offer-cancel").addEventListener("click", (e) => {
+    e.preventDefault();
+    modal.remove();
+  });
 };
 
 const setupModalPosition = (modal, e) => {
@@ -156,6 +276,7 @@ const registerEditModalEvent = (modal, arg) => {
   const color = modal.querySelector("#color");
   const location = modal.querySelector("#location");
   const message = modal.querySelector("#message");
+  const visibility = modal.querySelector("#visibility");
 
   // 保存
   const saveButton = modal.querySelector("#save");
@@ -170,6 +291,7 @@ const registerEditModalEvent = (modal, arg) => {
         color: color.value,
         location: location.value,
         message: message.value,
+        visibility: visibility.value,
       };
       console.log("送信するイベントデータ: ", eventData);
 
@@ -181,8 +303,9 @@ const registerEditModalEvent = (modal, arg) => {
         arg.event.setProp("color", color.value);
         arg.event.setExtendedProp("location", location.value);
         arg.event.setExtendedProp("message", message.value);
+        arg.event.setExtendedProp("visibility", visibility.value);
 
-        sendEventToServer(arg.event.id, eventData);
+        updateEventOnServer(arg.event.id, eventData);
       } else {
         // 新規作成時
         const newEvent = calendar.addEvent({
@@ -191,12 +314,14 @@ const registerEditModalEvent = (modal, arg) => {
           title: title.value,
           color: color.value,
           extendedProps: {
+            type: "plan",
             location: location.value,
             message: message.value,
+            visibility: visibility.value,
           },
         });
 
-        sendEventToServer(newEvent.id, eventData);
+        createEventOnServer(newEvent, eventData);
       }
 
       calendar.unselect();
@@ -236,8 +361,8 @@ const setupModalData = (modal, data) => {
   const color = modal.querySelector("#color");
   const location = modal.querySelector("#location");
   const message = modal.querySelector("#message");
+  const visibility = modal.querySelector("#visibility");
 
-  console.log(data);
   if (data.event !== undefined) {
     start.value = convertISOToDatetimeLocal(data.event.startStr);
     end.value = convertISOToDatetimeLocal(data.event.endStr);
@@ -245,8 +370,8 @@ const setupModalData = (modal, data) => {
     color.value = data.event.color;
     location.value = data.event.extendedProps.location;
     message.value = data.event.extendedProps.message;
+    visibility.value = data.event.extendedProps.visibility || "public";
   } else {
-    console.log(data.startStr);
     start.value = convertISOToDatetimeLocal(data.startStr);
   }
 };
@@ -266,31 +391,40 @@ function convertISOToDatetimeLocal(isoString) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-// イベント登録リクエストの送信
-const sendEventToServer = (eventId, eventData, method) => {
-  const url = eventId ? `/api/plans/${eventId}/` : "/api/plans/";
+// Date を「YYYY/MM/DD HH:MM」形式の文字列に変換
+function formatDatetime(date) {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${year}/${month}/${day} ${hours}:${minutes}`;
+}
 
-  const payload = {
-    start: eventData.start,
-    end: eventData.end,
-    title: eventData.title,
-    color: eventData.color,
-    location: eventData.location,
-    message: eventData.message,
-  };
-
-  const axiosConfig = {
-    method: eventId ? "PUT" : "POST",
-    url: url,
-    data: payload,
-  };
-
-  axios(axiosConfig)
+// 予定の新規登録リクエストを送信
+const createEventOnServer = (newEvent, eventData) => {
+  axios
+    .post("/api/plans/", eventData)
     .then((response) => {
-      console.log("イベントが送信されました:", response.data);
+      console.log("イベントが登録されました:", response.data);
+      // サーバーが採番したIDを画面上のイベントに反映する(編集・削除に必要)
+      newEvent.setProp("id", String(response.data.event_id));
     })
     .catch((error) => {
-      console.error("イベント送信エラー:", error);
+      console.error("イベント登録エラー:", error);
+    });
+};
+
+// 予定の更新リクエストを送信
+const updateEventOnServer = (eventId, eventData) => {
+  axios
+    .put("/api/plans/", { id: eventId, ...eventData })
+    .then((response) => {
+      console.log("イベントが更新されました:", response.data);
+    })
+    .catch((error) => {
+      console.error("イベント更新エラー:", error);
     });
 };
 
@@ -304,15 +438,9 @@ const sendDeleteRequest = (eventId) => {
     .catch((error) => {
       console.error(
         "イベント削除エラー:",
-        error.response.data,
+        error.response ? error.response.data : error,
         "ID:",
-        arg.event.id
+        eventId
       );
     });
-};
-
-// イベント削除
-const deleteEvent = (event) => {
-  event.remove();
-  sendDeleteRequest(event.id);
 };
