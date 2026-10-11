@@ -1,15 +1,21 @@
 {% extends 'encor_app/layout.html' %}
 
-{% block title %}plans_new{% endblock %}
-
-{% load static %}
+{% block title %}ユーザー登録{% endblock %}
 
 {% block content %}
-    <h1>ユーザー登録</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">登録</button>
-    </form>
-    <p><a href="{% url 'signin' %}">サインイン</a></p>
+    <div class="card auth-card">
+        <h1>ユーザー登録</h1>
+        <p class="auth-card__lead">無料で自分のカレンダーをつくれます</p>
+        <form method="post" class="form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn--primary btn--block">登録する</button>
+        </form>
+        <p class="auth-card__switch">すでにアカウントをお持ちの方は <a href="{% url 'signin' %}">サインイン</a></p>
+    </div>
 {% endblock%}

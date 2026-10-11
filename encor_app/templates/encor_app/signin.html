@@ -1,15 +1,21 @@
 {% extends 'encor_app/layout.html' %}
 
-{% block title %}plans_new{% endblock %}
-
-{% load static %}
+{% block title %}サインイン{% endblock %}
 
 {% block content %}
-    <h1>Sign in</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign in</button>
-    </form>
-    <p><a href="{% url 'signup' %}">新規登録</a></p>
+    <div class="card auth-card">
+        <h1>サインイン</h1>
+        <p class="auth-card__lead">Encor へようこそ</p>
+        <form method="post" class="form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn--primary btn--block">サインイン</button>
+        </form>
+        <p class="auth-card__switch">アカウントをお持ちでない方は <a href="{% url 'signup' %}">新規登録</a></p>
+    </div>
 {% endblock%}

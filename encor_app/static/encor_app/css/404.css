@@ -26,15 +26,10 @@
     transform: scale(1);
   }
 }
-body {
-  /*background-color: #f7f7f7;*/
-  background-color: #ffffff;
-}
 .container {
-  font-family: "Varela Round", sans-serif;
   color: #9b9b9b;
   position: relative;
-  height: 100vh;
+  min-height: 60vh;
   text-align: center;
   font-size: 16px;
 }

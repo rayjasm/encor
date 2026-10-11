@@ -1,25 +1,41 @@
 {% extends 'encor_app/layout.html' %}
 
-{% load static %}
+{% block title %}トップ{% endblock %}
 
 {% block content %}
-       <center><h1>Encor</h1>
-        <br>
-        <div id="media-container"></div>
-        <p>{{title}}</p>
-        <p>Explanation : {{explanation}}</p>
-        
-        </center>
+    <section class="hero">
+        <h1 class="hero__title">Encor</h1>
+        <p class="hero__lead">
+            自分の予定を友人に公開して、空いている日に「予約リクエスト」を受け付けるカレンダーです。<br>
+            飲食店やホテルのリクエスト予約のように、友人が希望日時を送り、あなたが承諾すると予定が確定します。
+        </p>
+        <div class="hero__actions">
+            {% if user.is_authenticated %}
+                <a class="btn btn--primary" href="{% url 'mypage' %}">
+                    <span class="material-icons" aria-hidden="true">calendar_month</span>マイページを開く
+                </a>
+            {% else %}
+                <a class="btn btn--primary" href="{% url 'signup' %}">無料ではじめる</a>
+                <a class="btn btn--ghost" href="{% url 'signin' %}">サインイン</a>
+            {% endif %}
+        </div>
+    </section>
 
-    <script>
-        var media_type = "{{media_type}}";
-        var url = "{{url}}";
-        
-        var media_container = document.getElementById('media-container');
-        if(media_type == 'image'){
-			media_container.innerHTML = '<p><img src="' + url + '" alt="Astronomy Picture"></p>';
-		}else{
-            media_container.innerHTML = '<iframe width="560" height="315" src="' + url + '?loop=1&autoplay=1&mute=1&rel=0&modestbranding=1" frameborder="0" allowfullscreen></iframe>';
-        }
-    </script>
+    <section class="features">
+        <div class="card feature">
+            <span class="feature__icon material-icons" aria-hidden="true">share</span>
+            <h2>予定を共有</h2>
+            <p>自分専用の URL を友人に渡すだけ。相手はログインなしであなたの公開予定を見られます。</p>
+        </div>
+        <div class="card feature">
+            <span class="feature__icon material-icons" aria-hidden="true">lock</span>
+            <h2>公開と非公開を区別</h2>
+            <p>予定ごとに公開か非公開かを選べます。プライベートな予定は自分にしか見えません。</p>
+        </div>
+        <div class="card feature">
+            <span class="feature__icon material-icons" aria-hidden="true">mail</span>
+            <h2>リクエストを受け付け</h2>
+            <p>友人が空いている日に希望を送ると、マイページに届きます。承諾すれば予定として確定します。</p>
+        </div>
+    </section>
 {% endblock %}

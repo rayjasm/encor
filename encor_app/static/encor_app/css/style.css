@@ -1,186 +1,684 @@
 @charset "utf-8";
 
-@import url("https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c");
+@import url("https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c:400,500,700&display=swap");
+
+/* =========================================================
+   デザイントークン
+   ========================================================= */
+:root {
+  --pink: #c71585;
+  --pink-dark: #a3106c;
+  --pink-soft: #fde8f3;
+  --pink-tint: #fff6fb;
+  --pink-line: #f3c4de;
+
+  --blue: #2c75ff;
+  --blue-soft: #e8f0ff;
+  --red: #dd1155;
+  --red-soft: #ffe9f0;
+
+  --ink: #2b2b2b;
+  --muted: #777;
+  --line: #e6e6e9;
+  --bg: #ffffff;
+  --soft: #f7f7f8;
+  --chip: #f1f1f3;
+  --card: #fff;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-pop: 0 14px 40px rgba(43, 43, 43, 0.18);
+}
+
+/* =========================================================
+   ベース
+   ========================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   font-family: "M PLUS Rounded 1c", sans-serif !important;
+  color: var(--ink);
+  background-color: var(--bg);
+  line-height: 1.6;
 }
 
 a {
   text-decoration: none;
-  color: #c71585;
+  color: var(--pink);
+}
+a:hover {
+  color: var(--pink-dark);
 }
 
-img {
-  text-align: right;
-  width: 400px;
-  height: 400px;
-  box-shadow: 5px 5px 5px #888888;
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 0.5em;
+}
+h1 {
+  font-size: 1.6rem;
+}
+h2 {
+  font-size: 1.2rem;
 }
 
-.line-section {
+.page {
   flex: 1;
-  background-color: #f5f5f5;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
 }
 
-.cmodal {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  padding: 1em;
-  max-width: 250px;
-  position: relative;
-  background-color: #fff;
-  border: 3px solid #f0f0f0;
-  border-radius: 4px;
-}
-.smodal {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  padding: 1em;
-  max-width: 250px;
-  position: relative;
-  background-color: #fff;
-  border: 3px solid #f0f0f0;
-  border-radius: 4px;
-}
-.modal__title {
-  margin-bottom: 0.5em;
-  align-self: flex-start;
-}
-.modal__title input[type="text"] {
-  width: 100px;
-}
-.modal__title label {
+.page-title {
   display: flex;
-  align-items: center;
+  align-items: baseline;
+  gap: 0.6em;
+  flex-wrap: wrap;
+  margin-bottom: 0.75em;
 }
-.modal__color {
-  margin-bottom: 0.5em;
-  align-self: flex-start;
-}
-.modal__times {
-  margin-bottom: 2em;
-}
-.modal__times > * {
-  margin-bottom: 0.5em;
-}
-.modal__times > *:last-child {
-  margin-bottom: 0;
-}
-.modal__times label {
-  display: flex;
-  align-items: center;
+.page-title__sub {
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
+/* =========================================================
+   ヘッダー / フッター
+   ========================================================= */
+.site-header {
+  background-color: var(--card);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.site-header__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+}
+.site-logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--pink);
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  color: var(--ink);
+  font-weight: 500;
+}
+.site-nav__link:hover {
+  color: var(--pink);
+}
+.site-nav__link .material-icons {
+  font-size: 1.2em;
+  color: var(--pink);
+}
+.site-nav__user {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.site-nav__form {
+  margin: 0;
+}
+
+.site-footer {
+  padding: 20px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* =========================================================
+   ボタン
+   ========================================================= */
+.btn,
 .modal-action-buttons__button {
-  border: 2px solid #000;
-  padding: 0.5em 1em;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  padding: 0.55em 1.2em;
+  border: 2px solid var(--pink);
+  border-radius: 999px;
   background-color: transparent;
+  color: var(--pink);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
   cursor: pointer;
-  transition: 0.25s;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn:hover,
+.modal-action-buttons__button:hover {
+  background-color: var(--pink);
+  color: #fff;
+}
+.btn:active,
+.modal-action-buttons__button:active {
+  transform: translateY(1px);
 }
 
+.btn--primary {
+  background-color: var(--pink);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(199, 21, 133, 0.25);
+}
+.btn--primary:hover {
+  background-color: var(--pink-dark);
+  border-color: var(--pink-dark);
+}
+.btn--ghost {
+  border-color: var(--line);
+  color: var(--ink);
+  background-color: var(--card);
+}
+.btn--ghost:hover {
+  border-color: var(--pink);
+  background-color: var(--card);
+  color: var(--pink);
+}
+.btn--small {
+  padding: 0.4em 0.9em;
+  font-size: 0.85rem;
+}
+.btn--block {
+  width: 100%;
+}
+
+/* モーダルや一覧の 保存 / 承諾 (青) と 削除 / 辞退 (赤) */
 .save {
-  color: #2c75ff;
-  border-color: #2c75ff;
+  color: var(--blue);
+  border-color: var(--blue);
 }
 .save:hover {
   color: #fff;
-  background-color: #2c75ff;
+  background-color: var(--blue);
 }
-
 .delete {
-  color: #dd1155;
-  border-color: #dd1155;
+  color: var(--red);
+  border-color: var(--red);
 }
 .delete:hover {
   color: #fff;
-  background-color: #dd1155;
+  background-color: var(--red);
 }
 
-.close {
+/* =========================================================
+   カード / フォーム
+   ========================================================= */
+.card {
+  background-color: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+.auth-card {
+  max-width: 420px;
+  margin: 24px auto;
+}
+.auth-card h1 {
+  text-align: center;
+}
+.auth-card__lead {
+  text-align: center;
+  color: var(--muted);
+  margin: 0 0 1.25em;
+}
+.auth-card__switch {
+  text-align: center;
+  margin: 1.25em 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Django の form.as_p 出力 */
+.form p {
+  margin: 0 0 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+.form label {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.form .helptext {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.form .helptext ul {
+  margin: 0.2em 0 0;
+  padding-left: 1.2em;
+}
+.form .errorlist {
+  list-style: none;
+  margin: 0 0 1em;
+  padding: 0.6em 0.9em;
+  background-color: var(--red-soft);
+  color: var(--red);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+.form .errorlist li + li {
+  margin-top: 0.25em;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="datetime-local"],
+select {
+  width: 100%;
+  padding: 0.55em 0.8em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background-color: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px var(--pink-soft);
+}
+input[type="color"] {
+  width: 48px;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background-color: var(--card);
   cursor: pointer;
-  border: none;
-  background-color: transparent;
-  position: absolute;
-  top: 0;
-  right: 0;
-  transform: translate(50%, -50%);
-  transition: 0.15s;
-}
-.close:hover {
-  opacity: 0.85;
-  background-color: transparent;
 }
 
-input[type="date"] {
-  padding: 0.5em 1em;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-weight: bold;
+/* =========================================================
+   トップページ
+   ========================================================= */
+.hero {
+  text-align: center;
+  padding: 48px 16px 32px;
+}
+.hero__title {
+  font-size: 2.6rem;
+  color: var(--pink);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2em;
+}
+.hero__lead {
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin: 0 auto 1.5em;
+  max-width: 560px;
+}
+.hero__actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75em;
+  flex-wrap: wrap;
 }
 
-/* 公開設定プルダウン */
-.modal__visibility {
-  margin-bottom: 1em;
-  align-self: flex-start;
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
 }
-.modal__visibility select {
-  padding: 0.25em 0.5em;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.feature {
+  text-align: left;
+}
+.feature__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--soft);
+  color: var(--pink);
+  margin-bottom: 0.6em;
+}
+.feature h2 {
+  font-size: 1.05rem;
+}
+.feature p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
-/* お誘い(オファー)モーダル */
-.omodal {
-  max-width: 300px;
-}
-.omodal__heading {
-  margin: 0 0 0.75em;
-  font-size: 1.1em;
-  color: #c71585;
-}
-.omodal .modal__field {
-  align-self: flex-start;
-  margin-bottom: 0.4em;
-}
-.omodal .modal__field label {
-  font-weight: bold;
+/* =========================================================
+   カレンダー (FullCalendar の上書き)
+   ========================================================= */
+.calendar-card {
+  padding: 16px;
 }
 
-/* カレンダー上のオファー表示(点線枠で予定と区別) */
+#calendar {
+  --fc-border-color: var(--line);
+  --fc-today-bg-color: var(--soft);
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: var(--soft);
+  --fc-button-bg-color: var(--card);
+  --fc-button-border-color: var(--line);
+  --fc-button-text-color: var(--ink);
+  --fc-button-hover-bg-color: var(--soft);
+  --fc-button-hover-border-color: var(--pink);
+  --fc-button-active-bg-color: var(--pink);
+  --fc-button-active-border-color: var(--pink);
+  --fc-event-border-color: transparent;
+  --fc-more-link-bg-color: var(--soft);
+  --fc-more-link-text-color: var(--pink);
+}
+.fc .fc-toolbar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.fc .fc-button {
+  font-family: inherit;
+  font-weight: 700;
+  border-radius: 999px !important;
+  padding: 0.35em 0.9em;
+  text-transform: none;
+  box-shadow: none !important;
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  color: #fff;
+}
+.fc .fc-button-group > .fc-button {
+  margin: 0 2px;
+}
+.fc .fc-col-header-cell-cushion {
+  padding: 8px 4px;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.fc .fc-daygrid-day-number {
+  padding: 6px 8px;
+  color: var(--ink);
+}
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  display: inline-block;
+  background-color: var(--pink);
+  color: #fff !important;
+  border-radius: 999px;
+  margin: 4px;
+  padding: 2px 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.fc .fc-daygrid-event {
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.fc .fc-daygrid-block-event .fc-event-time {
+  font-weight: 500;
+  opacity: 0.9;
+}
+.fc .fc-daygrid-dot-event .fc-event-title {
+  font-weight: 500;
+}
+.fc .fc-highlight {
+  background-color: var(--pink-soft);
+}
+.fc .fc-day-sat .fc-daygrid-day-number {
+  color: var(--blue);
+}
+.fc .fc-day-sun .fc-daygrid-day-number {
+  color: var(--red);
+}
+
+/* 非公開の予定(マイページのみ)は縞模様で区別する */
+.fc .plan-private {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.35) 0 4px,
+    transparent 4px 8px
+  );
+}
+.fc .plan-private .fc-event-title::before {
+  content: "lock";
+  font-family: "Material Icons";
+  font-size: 0.9em;
+  vertical-align: -1px;
+  margin-right: 2px;
+}
+
+/* カレンダー上のリクエスト表示(点線枠で予定と区別) */
 .fc .offer-event {
-  border: 2px dashed #c71585 !important;
-  background-color: #fff0f7 !important;
-  color: #c71585 !important;
+  border: 2px dashed var(--pink) !important;
+  background-color: var(--card) !important;
+  color: var(--pink) !important;
 }
 .fc .offer-event .fc-event-title,
 .fc .offer-event .fc-event-time {
-  color: #c71585;
+  color: var(--pink);
 }
 
-/* 新着リクエスト一覧パネル */
+/* =========================================================
+   モーダル (予定編集 / 詳細 / リクエスト)
+   ========================================================= */
+.cmodal,
+.smodal {
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6em;
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  padding: 1.1em 1.2em 1em;
+  position: relative;
+  background-color: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+}
+
+.cmodal label,
+.modal__times label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.modal__title,
+.modal__name,
+.modal__times,
+.modal__color,
+.modal__location,
+.modal__contact,
+.modal__message,
+.modal__visibility {
+  margin: 0;
+  align-self: stretch;
+}
+.modal__title input[type="text"] {
+  width: 100%;
+}
+.modal__times {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+}
+.modal__times > * {
+  margin: 0;
+}
+.modal__color label {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.modal-action-buttons {
+  display: flex;
+  gap: 0.5em;
+  margin-top: 0.5em;
+}
+.modal-action-buttons .modal-action-buttons__button {
+  flex: 1;
+  padding: 0.5em 0.6em;
+  font-size: 0.9rem;
+}
+
+/* 閉じるボタン(右上の丸) */
+.close,
+.close-button {
+  cursor: pointer;
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background-color: var(--card);
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: color 0.15s, border-color 0.15s;
+}
+.close:hover,
+.close-button:hover {
+  color: var(--pink);
+  border-color: var(--pink);
+  background-color: var(--card);
+}
+.close.material-icons {
+  font-size: 20px;
+}
+
+/* 詳細モーダル / リクエストモーダルの項目 */
+.smodal .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+.smodal h2,
+.omodal__heading {
+  margin: 0 0 0.4em;
+  font-size: 1.05rem;
+  color: var(--pink);
+}
+.modal__field {
+  display: flex;
+  gap: 0.5em;
+  align-items: baseline;
+  font-size: 0.92rem;
+}
+.modal__field label {
+  flex-shrink: 0;
+  min-width: 4.5em;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.modal__field span {
+  word-break: break-word;
+}
+
+/* =========================================================
+   マイページ: 共有 URL / 新着リクエスト一覧
+   ========================================================= */
+.share-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  flex-wrap: wrap;
+  margin: 12px 0 20px;
+  padding: 14px 18px;
+  background-color: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.share-bar__text {
+  flex: 1;
+  min-width: 200px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.share-bar__url {
+  font-family: Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background-color: var(--chip);
+  padding: 0.2em 0.5em;
+  border-radius: 6px;
+  word-break: break-all;
+}
+
 .requests-panel {
-  margin: 1em 0 1.5em;
-  padding: 1em 1.25em;
-  background-color: #fff6fb;
-  border: 2px solid #f5c6e0;
-  border-radius: 8px;
+  margin: 0 0 20px;
+  padding: 18px 20px;
+  background-color: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 .requests-panel__heading {
-  margin: 0 0 0.5em;
-  font-size: 1.1em;
-  color: #c71585;
+  display: flex;
+  align-items: center;
+  margin: 0 0 0.6em;
+  font-size: 1.05rem;
+  color: var(--pink);
 }
 .requests-panel__count {
   margin-left: 0.5em;
-  padding: 0.1em 0.6em;
-  font-size: 0.8em;
+  padding: 0.05em 0.6em;
+  font-size: 0.78em;
   color: #fff;
-  background-color: #c71585;
+  background-color: var(--pink);
   border-radius: 999px;
 }
 .requests-panel__count:empty {
@@ -188,23 +686,31 @@ input[type="date"] {
 }
 .requests-panel__empty {
   margin: 0;
-  color: #888;
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 .requests-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .request-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1em;
-  padding: 0.6em 0.75em;
-  margin-bottom: 0.5em;
-  background-color: #fff;
-  border: 1px dashed #c71585;
-  border-radius: 6px;
+  padding: 10px 14px;
+  background-color: var(--soft);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--pink);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s;
+}
+.request-row:hover {
+  background-color: var(--card);
 }
 .request-row__body {
   flex: 1;
@@ -221,25 +727,26 @@ input[type="date"] {
   align-items: baseline;
 }
 .request-row__name {
-  font-weight: bold;
-  color: #c71585;
+  font-weight: 700;
+  color: var(--pink);
 }
 .request-row__time {
-  color: #333;
+  color: var(--ink);
+  font-size: 0.92rem;
 }
 .request-row__sub {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75em;
-  font-size: 0.9em;
-  color: #555;
+  font-size: 0.88rem;
+  color: var(--muted);
 }
 .request-row__sub span:empty {
   display: none;
 }
 .request-row__received {
-  font-size: 0.8em;
-  color: #999;
+  font-size: 0.78rem;
+  color: #aaa;
 }
 .request-row__actions {
   display: flex;
@@ -248,11 +755,64 @@ input[type="date"] {
   flex-shrink: 0;
 }
 .request-row__actions .modal-action-buttons__button {
-  padding: 0.3em 0.8em;
-  font-size: 0.9em;
+  padding: 0.35em 0.8em;
+  font-size: 0.85rem;
 }
 .request-row__visibility {
-  padding: 0.25em 0.4em;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  width: auto;
+  padding: 0.3em 0.5em;
+  font-size: 0.85rem;
+}
+
+/* =========================================================
+   公開カレンダー
+   ========================================================= */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  background-color: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+.notice .material-icons {
+  color: var(--pink);
+  font-size: 1.2em;
+}
+
+/* =========================================================
+   レスポンシブ
+   ========================================================= */
+@media (max-width: 640px) {
+  .site-nav__user {
+    display: none;
+  }
+  .page {
+    padding: 16px 12px 40px;
+  }
+  .card,
+  .calendar-card {
+    padding: 12px;
+  }
+  .hero__title {
+    font-size: 2rem;
+  }
+  .request-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .request-row__actions {
+    justify-content: flex-end;
+  }
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.05rem;
+  }
 }

@@ -1,19 +1,25 @@
+{% extends 'encor_app/layout.html' %}
+
+{% block title %}ユーザーが見つかりません{% endblock %}
+
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'encor_app/css/404.css' %}">
+{% block content %}
+    <link rel="stylesheet" href="{% static 'encor_app/css/404.css' %}">
 
-<div class="container">
-    <div class="boo-wrapper">
-      <div class="boo">
-        <div class="face"></div>
-      </div>
-      <div class="shadow"></div>
-  
-      <h1>Whoops!</h1>
-      <p>
-        We couldn't find the page you
-        <br />
-        were looking for.
-      </p>
+    <div class="container">
+        <div class="boo-wrapper">
+            <div class="boo">
+                <div class="face"></div>
+            </div>
+            <div class="shadow"></div>
+
+            <h1>Whoops!</h1>
+            <p>
+                このカレンダーは見つかりませんでした。<br>
+                URL が正しいか確認してください。
+            </p>
+            <p><a class="btn btn--ghost btn--small" href="{% url 'index' %}">トップへ戻る</a></p>
+        </div>
     </div>
-</div>
+{% endblock %}

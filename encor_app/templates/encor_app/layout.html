@@ -3,12 +3,10 @@
 <html lang="ja">
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Encor{% endblock %} | Encor</title>
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'encor_app/css/style.css' %}" />
-    <!-- bootstrap -->
-    <!-- link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script -->
     <!-- fullcalendar -->
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.css">
     <script src="https://unpkg.com/@fullcalendar/core/main.js"></script>
@@ -20,12 +18,34 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    Encor
-    <a href="{% url 'mypage' %}"> {{ user.username }}<br></a><br>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="site-logo" href="{% url 'index' %}">Encor</a>
+            <nav class="site-nav">
+                {% if user.is_authenticated %}
+                    <a class="site-nav__link" href="{% url 'mypage' %}">
+                        <span class="material-icons" aria-hidden="true">calendar_month</span>マイページ
+                    </a>
+                    <span class="site-nav__user">{{ user.username }}</span>
+                    <form method="post" action="{% url 'signout' %}" class="site-nav__form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn--ghost btn--small">サインアウト</button>
+                    </form>
+                {% else %}
+                    <a class="btn btn--ghost btn--small" href="{% url 'signin' %}">サインイン</a>
+                    <a class="btn btn--primary btn--small" href="{% url 'signup' %}">新規登録</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
 
+    <main class="page">
     {% block content %}
     {% endblock %}
+    </main>
 
-    <center><small>copyright&copy; encor</small></center>
+    <footer class="site-footer">
+        <small>&copy; Encor</small>
+    </footer>
 </body>
 </html>

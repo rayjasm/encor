@@ -7,6 +7,7 @@ urlpatterns = [
     path("plans/new/", views.plans_new, name='plans_new'),
     path("signup/", views.signup, name='signup'),
     path('signin/', auth_views.LoginView.as_view(template_name='encor_app/signin.html'), name='signin'),  # 一般ユーザー用サインイン
+    path('signout/', auth_views.LogoutView.as_view(next_page='index'), name='signout'),
     path("mypage/", views.mypage, name='mypage'),
     path("api/plans/", views.api_plans, name='api_plans'),
     path("users/<int:user_id>/", views.user_calendar, name='user_calendar'),

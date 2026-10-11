@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
     height: 700,
 
     /* 予定の表示 */
+    eventDisplay: "block" /* 時刻付きの予定も塗りつぶしで表示 */,
     eventTimeFormat: {
       hour: "2-digit",
       minute: "2-digit",
@@ -92,7 +93,10 @@ document.addEventListener("DOMContentLoaded", function () {
       axios
         .get(`/get/plans/${userId}/`)
         .then((response) => {
-          const events = response.data.events;
+          const events = response.data.events.map((e) => ({
+            ...e,
+            textColor: textColorFor(e.color),
+          }));
           console.log("取得したイベントデータ:", events);
           calendar.removeAllEvents();
           successCallback(events);
@@ -262,6 +266,16 @@ const updateToModal = (modal, data) => {
   location.textContent = event.extendedProps.location || "";
   message.textContent = event.extendedProps.message || "";
 };
+
+// 背景色の明るさから読みやすい文字色(濃いグレー or 白)を返す
+function textColorFor(bgColor) {
+  if (!bgColor || !/^#[0-9a-f]{6}$/i.test(bgColor)) return undefined;
+  const r = parseInt(bgColor.slice(1, 3), 16);
+  const g = parseInt(bgColor.slice(3, 5), 16);
+  const b = parseInt(bgColor.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? "#2b2b2b" : "#ffffff";
+}
 
 // Date を「YYYY/MM/DD HH:MM」形式の文字列に変換
 function formatDatetime(date) {

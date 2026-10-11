@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
     },
 
     /* 予定の表示 */
+    eventDisplay: "block" /* 時刻付きの予定も塗りつぶしで表示 */,
     eventTimeFormat: {
       hour: "2-digit",
       minute: "2-digit",
@@ -99,6 +100,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 end: e.end,
                 title: e.title,
                 color: e.color,
+                textColor: textColorFor(e.color),
+                classNames: e.visibility === "private" ? ["plan-private"] : [],
                 extendedProps: {
                   type: "plan",
                   location: e.location,
@@ -362,6 +365,7 @@ const registerEditModalEvent = (modal, arg) => {
         arg.event.setEnd(end.value);
         arg.event.setProp("title", title.value);
         arg.event.setProp("color", color.value);
+        arg.event.setProp("textColor", textColorFor(color.value));
         arg.event.setExtendedProp("location", location.value);
         arg.event.setExtendedProp("message", message.value);
         arg.event.setExtendedProp("visibility", visibility.value);
@@ -374,6 +378,7 @@ const registerEditModalEvent = (modal, arg) => {
           end: end.value,
           title: title.value,
           color: color.value,
+          textColor: textColorFor(color.value),
           extendedProps: {
             type: "plan",
             location: location.value,
@@ -450,6 +455,16 @@ function convertISOToDatetimeLocal(isoString) {
 
   // datetime-local形式の文字列を返す
   return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// 背景色の明るさから読みやすい文字色(濃いグレー or 白)を返す
+function textColorFor(bgColor) {
+  if (!bgColor || !/^#[0-9a-f]{6}$/i.test(bgColor)) return undefined;
+  const r = parseInt(bgColor.slice(1, 3), 16);
+  const g = parseInt(bgColor.slice(3, 5), 16);
+  const b = parseInt(bgColor.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? "#2b2b2b" : "#ffffff";
 }
 
 // Date を「YYYY/MM/DD HH:MM」形式の文字列に変換

@@ -1,16 +1,31 @@
 {% extends 'encor_app/layout.html' %}
 
-{% block title %}mypage{% endblock %}
+{% block title %}マイページ{% endblock %}
 
 {% load static %}
 
 {% block content %}
-    <h1>my page</h1>
-    Hi <b>{{ user.username }}</b>
+    <div class="page-title">
+        <h1>マイページ</h1>
+        <span class="page-title__sub">こんにちは、<b>{{ user.username }}</b> さん</span>
+    </div>
+
+    <!-- 共有 URL -->
+    <div class="share-bar">
+        <span class="material-icons" aria-hidden="true" style="color: var(--pink);">share</span>
+        <span class="share-bar__text">
+            この URL を友人に渡すと、公開予定の閲覧と予約リクエストの送信ができます。<br>
+            <span class="share-bar__url" id="share-url"></span>
+        </span>
+        <button class="btn btn--primary btn--small" id="copy-calendar-url" data-url="{% url 'user_calendar' user_id=request.user.id %}">
+            <span class="material-icons" aria-hidden="true">content_copy</span>URL をコピー
+        </button>
+    </div>
 
     <!-- 新着リクエスト一覧 -->
     <section class="requests-panel" id="requests-panel">
         <h2 class="requests-panel__heading">
+            <span class="material-icons" aria-hidden="true" style="margin-right: 0.3em;">mail</span>
             新着リクエスト<span class="requests-panel__count" id="requests-count"></span>
         </h2>
         <p class="requests-panel__empty" id="requests-empty">新着リクエストはありません</p>
@@ -42,31 +57,34 @@
         </li>
     </template>
 
-    <div id="calendar"></div>
+    <div class="card calendar-card">
+        <div id="calendar"></div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.js"></script>
     <script src="{% static 'encor_app/calendar.js' %}"></script>
 
+    <!-- 予定の登録・編集モーダル -->
     <div class="cmodal" id="modal-template">
     <div class="modal__title">
-    <label>タイトル : <input type="text" id="title" name="title"></label></div>
+    <label>タイトル<input type="text" id="title" name="title"></label></div>
 
     <div class="modal__times">
-    <label>開始時刻 : <input type="datetime-local" id="start" name="open_date"></label>
-    <label>終了時刻 : <input type="datetime-local" id="end" name="close_date"></label></div>
+    <label>開始時刻<input type="datetime-local" id="start" name="open_date"></label>
+    <label>終了時刻<input type="datetime-local" id="end" name="close_date"></label></div>
 
     <div class="modal__color">
-    <label>背景色 : <input type="color" id="color"></label></div>
+    <label>背景色<input type="color" id="color"></label></div>
 
     <div class="modal__location">
-    <label>場所 : <input type="text" id="location" name="location"></label></div>
+    <label>場所<input type="text" id="location" name="location"></label></div>
 
     <div class="modal__message">
-    <label>コメント : <input type="text" id="message" name="message"></label></div>
+    <label>コメント<input type="text" id="message" name="message"></label></div>
 
     <div class="modal__visibility">
-    <label>公開設定 :
+    <label>公開設定
     <select id="visibility" name="visibility">
         <option value="public">公開</option>
         <option value="private">非公開</option>
@@ -75,7 +93,7 @@
     <div class="modal-action-buttons">
     <button class="modal-action-buttons__button save" id="save">保存</button>
     <button class="modal-action-buttons__button delete" id="delete">削除</button>
-    <button class="modal-action-buttons close material-icons" id="cancel">cancel</button>
+    <button class="modal-action-buttons close material-icons" id="cancel" title="閉じる">close</button>
     </div>
     </div>
 
@@ -83,14 +101,14 @@
     <div class="cmodal omodal" id="offer-modal-template">
     <h3 class="omodal__heading">予約リクエストが届いています</h3>
 
-    <div class="modal__field"><label>名前 : </label><span id="offer-name"></span></div>
-    <div class="modal__field"><label>開始 : </label><span id="offer-start"></span></div>
-    <div class="modal__field"><label>終了 : </label><span id="offer-end"></span></div>
-    <div class="modal__field"><label>連絡先 : </label><span id="offer-contact"></span></div>
-    <div class="modal__field"><label>コメント : </label><span id="offer-message"></span></div>
+    <div class="modal__field"><label>名前</label><span id="offer-name"></span></div>
+    <div class="modal__field"><label>開始</label><span id="offer-start"></span></div>
+    <div class="modal__field"><label>終了</label><span id="offer-end"></span></div>
+    <div class="modal__field"><label>連絡先</label><span id="offer-contact"></span></div>
+    <div class="modal__field"><label>コメント</label><span id="offer-message"></span></div>
 
     <div class="modal__visibility">
-    <label>承諾後の公開設定 :
+    <label>承諾後の公開設定
     <select id="offer-visibility" name="visibility">
         <option value="public">公開</option>
         <option value="private">非公開</option>
@@ -99,23 +117,22 @@
     <div class="modal-action-buttons">
     <button class="modal-action-buttons__button save" id="offer-accept">承諾</button>
     <button class="modal-action-buttons__button delete" id="offer-decline">辞退</button>
-    <button class="modal-action-buttons close material-icons" id="offer-cancel">cancel</button>
+    <button class="modal-action-buttons close material-icons" id="offer-cancel" title="閉じる">close</button>
     </div>
     </div>
-    <br>
-    <p>
-    <button id="copy-calendar-url" data-url="{% url 'user_calendar' user_id=request.user.id %}">カレンダーを共有</button>
-    </p>
-    <script>
-        document.getElementById('copy-calendar-url').addEventListener('click', function() {
-            var url = this.getAttribute('data-url');
-            navigator.clipboard.writeText(url).then(function() {
-                alert('URLがクリップボードにコピーされました: ' + url);
-            }).catch(function(err) {
-                alert('コピーに失敗しました: ' + err);
-            });
-        });
-    </script>
 
-    <!-- サインアウト -->
+    <script>
+        (function () {
+            var button = document.getElementById('copy-calendar-url');
+            var url = window.location.origin + button.getAttribute('data-url');
+            document.getElementById('share-url').textContent = url;
+            button.addEventListener('click', function() {
+                navigator.clipboard.writeText(url).then(function() {
+                    alert('URLをクリップボードにコピーしました: ' + url);
+                }).catch(function(err) {
+                    alert('コピーに失敗しました: ' + err);
+                });
+            });
+        })();
+    </script>
 {% endblock%}
