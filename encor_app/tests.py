@@ -130,6 +130,28 @@ class OfferMypageTest(CalendarTestBase):
         self.assertEqual(plan.close_date, self.end)
         self.assertEqual(plan.message, "遊ぼう")
         self.assertEqual(plan.visibility, Plan.VISIBILITY_PUBLIC)
+        # 元のリクエストと結び付き、レスポンスに送信者情報が含まれる
+        self.assertEqual(plan.offer, offer)
+        self.assertEqual(res.json()["plan"]["request"]["contact"], "090-0000-0000")
+
+    def test_mypage_api_includes_request_info_for_accepted_plan(self):
+        offer = self.make_offer()
+        offer.accept()
+        Plan.objects.create(user=self.owner, open_date=self.start, close_date=self.end, title="自分の予定")
+
+        self.client.login(username="owner", password="pw")
+        events = {e["title"]: e for e in self.client.get(reverse("api_plans")).json()["events"]}
+        self.assertEqual(events["友人A"]["request"]["name"], "友人A")
+        self.assertEqual(events["友人A"]["request"]["contact"], "090-0000-0000")
+        self.assertEqual(events["友人A"]["request"]["message"], "遊ぼう")
+        self.assertIsNone(events["自分の予定"]["request"])
+
+    def test_public_api_never_exposes_request_info(self):
+        self.make_offer().accept()
+        public = self.client.get(reverse("get_plans_to_calendar", args=[self.owner.id])).json()["events"]
+        self.assertEqual(len(public), 1)
+        self.assertNotIn("request", public[0])
+        self.assertNotIn("contact", public[0])
 
     def test_accept_with_private_visibility(self):
         offer = self.make_offer()

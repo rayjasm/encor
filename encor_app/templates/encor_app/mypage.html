@@ -90,6 +90,19 @@
         <option value="private">非公開</option>
     </select></label></div>
 
+    <!-- リクエストを承諾して作られた予定のみ表示 -->
+    <div class="modal__request" id="request-info" hidden>
+    <div class="modal__request-heading">
+        <span class="material-icons" aria-hidden="true">contact_mail</span>リクエスト送信者の連絡先
+    </div>
+    <div class="modal__request-contact">
+        <span id="request-contact"></span>
+        <button type="button" class="btn btn--ghost btn--small" id="request-contact-copy" title="連絡先をコピー">
+            <span class="material-icons" aria-hidden="true">content_copy</span>コピー
+        </button>
+    </div>
+    </div>
+
     <div class="modal-action-buttons">
     <button class="modal-action-buttons__button save" id="save">保存</button>
     <button class="modal-action-buttons__button delete" id="delete">削除</button>

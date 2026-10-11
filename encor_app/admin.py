@@ -4,7 +4,7 @@ from .models import Plan, Offer
 
 
 class PlanAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'title', 'open_date', 'close_date', 'visibility')
+    list_display = ('id', 'user', 'title', 'open_date', 'close_date', 'visibility', 'offer')
     list_filter = ('visibility',)
 
 

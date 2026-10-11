@@ -107,6 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   location: e.location,
                   message: e.message,
                   visibility: e.visibility,
+                  request: e.request || null,
                 },
               }));
               successCallback(events);
@@ -435,9 +436,40 @@ const setupModalData = (modal, data) => {
     location.value = data.event.extendedProps.location;
     message.value = data.event.extendedProps.message;
     visibility.value = data.event.extendedProps.visibility || "public";
+    showRequestInfo(modal, data.event.extendedProps.request);
   } else {
     start.value = convertISOToDatetimeLocal(data.startStr);
   }
+};
+
+// 承諾したリクエストの送信者の連絡先を編集モーダルに表示する
+// (名前とコメントは予定のタイトル・コメント欄に入っているので表示しない)
+const showRequestInfo = (modal, request) => {
+  const box = modal.querySelector("#request-info");
+  if (!box || !request) return;
+
+  const contact = request.contact || "";
+  const contactEl = modal.querySelector("#request-contact");
+  const copyButton = modal.querySelector("#request-contact-copy");
+  contactEl.textContent = contact || "(未入力)";
+
+  if (contact) {
+    copyButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      navigator.clipboard
+        .writeText(contact)
+        .then(() => {
+          const label = copyButton.innerHTML;
+          copyButton.innerHTML =
+            '<span class="material-icons" aria-hidden="true">check</span>完了';
+          setTimeout(() => (copyButton.innerHTML = label), 1500);
+        })
+        .catch((err) => alert("コピーに失敗しました: " + err));
+    });
+  } else {
+    copyButton.remove();
+  }
+  box.hidden = false;
 };
 
 function convertISOToDatetimeLocal(isoString) {

@@ -36,7 +36,17 @@
     <label>背景色<input type="color" id="color"></label></div>
 
     <div class="modal__contact">
-    <label>連絡先<input type="text" id="contact" name="contact"></label></div>
+    <label>連絡先
+    <span class="contact-kinds" aria-hidden="true">
+        <span class="contact-kind"><span class="material-icons">call</span>電話</span>
+        <span class="contact-kind"><span class="material-icons">mail</span>メール</span>
+        <span class="contact-kind"><span class="material-icons">home</span>住所</span>
+    </span>
+    <input type="text" id="contact" name="contact" maxlength="100"
+           placeholder="電話 / メール / 住所 のいずれか"
+           aria-describedby="contact-hint">
+    <span class="modal__hint" id="contact-hint">相手があなたに連絡するために使います</span>
+    </label></div>
 
     <div class="modal__message">
     <label>コメント<input type="text" id="message" name="message"></label></div>

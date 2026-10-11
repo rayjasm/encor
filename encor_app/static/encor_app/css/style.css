@@ -627,6 +627,83 @@ input[type="color"] {
   word-break: break-word;
 }
 
+/* 連絡先の入力欄: 受け付ける種類をアイコンで示す */
+.contact-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em;
+  margin: 0.1em 0 0.15em;
+  font-weight: 500;
+  color: var(--muted);
+}
+.contact-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  font-size: 0.8rem;
+}
+.contact-kind .material-icons {
+  font-size: 1.1em;
+  color: var(--pink);
+}
+.modal__hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+.cmodal input::placeholder {
+  color: #b5b5b5;
+  font-size: 0.85em;
+}
+
+/* 編集モーダル内のリクエスト情報(承諾した予定のみ) */
+.modal__request {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  margin-top: 0.2em;
+  padding: 0.7em 0.8em;
+  background-color: var(--soft);
+  border-left: 4px solid var(--pink);
+  border-radius: var(--radius-sm);
+}
+.modal__request[hidden] {
+  display: none;
+}
+.modal__request-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--pink);
+}
+.modal__request-heading .material-icons {
+  font-size: 1.1em;
+}
+.modal__request-contact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6em;
+}
+.modal__request-contact span {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  word-break: break-all;
+  user-select: all;
+}
+.modal__request-contact .btn {
+  flex-shrink: 0;
+  min-width: 5.5em;
+  padding: 0.3em 0.7em;
+  font-size: 0.8rem;
+}
+.modal__request-contact .btn .material-icons {
+  font-size: 1.1em;
+}
+
 /* =========================================================
    マイページ: 共有 URL / 新着リクエスト一覧
    ========================================================= */

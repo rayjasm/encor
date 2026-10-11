@@ -41,8 +41,13 @@ def plans_new(request):
         
         return render(request, 'encor_app/plans_new.html', {'form': plan_form})
 
-def plan_to_dict(plan):
-    return {
+def plan_to_dict(plan, include_request=False):
+    """
+    予定を JSON 用の dict にする。
+    include_request=True のとき(マイページ向け)は、承諾したリクエストの
+    送信者名・連絡先・コメントも含める。公開カレンダーには含めない。
+    """
+    data = {
         "id": plan.id,
         "start": plan.open_date.isoformat(),
         "end": plan.close_date.isoformat(),
@@ -52,6 +57,20 @@ def plan_to_dict(plan):
         "message": plan.message,
         "visibility": plan.visibility,
     }
+    if include_request:
+        offer = plan.offer
+        data["request"] = (
+            {
+                "id": offer.id,
+                "name": offer.name,
+                "contact": offer.contact,
+                "message": offer.message,
+                "request_date": offer.request_date.isoformat(),
+            }
+            if offer is not None
+            else None
+        )
+    return data
 
 
 def parse_visibility(value):
@@ -74,8 +93,8 @@ def api_plans(request):
         message = request.GET.get("message")
         
         delete_expired_if_due()
-        events = Plan.objects.filter(user=request.user)
-        return JsonResponse({'events': [plan_to_dict(e) for e in events]})
+        events = Plan.objects.filter(user=request.user).select_related("offer")
+        return JsonResponse({'events': [plan_to_dict(e, include_request=True) for e in events]})
     
     # 新規登録
     elif request.method == "POST":
@@ -301,7 +320,7 @@ def api_offer_accept(request, offer_id):
         'status': 'success',
         'message': 'Offer accepted',
         'offer_id': offer.id,
-        'plan': plan_to_dict(plan),
+        'plan': plan_to_dict(plan, include_request=True),
     })
 
 

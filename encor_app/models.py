@@ -21,6 +21,11 @@ class Plan(models.Model):
     visibility = models.CharField(
         max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_PUBLIC
     )
+    # リクエストを承諾して作られた予定は、元のリクエストを参照する
+    # (送信者の名前・連絡先・コメントをマイページで確認できるようにするため)
+    offer = models.OneToOneField(
+        "Offer", null=True, blank=True, on_delete=models.SET_NULL, related_name="plan"
+    )
 
     @property
     def is_public(self):
@@ -43,7 +48,8 @@ class Offer(models.Model):
     name = models.CharField(max_length=10, null=False, blank=False)
     color = models.CharField(max_length=10, null=True, blank=True)
     message = models.CharField(max_length=30, null=True, blank=True)    
-    contact = models.CharField(max_length=20)
+    # 電話番号・メールアドレス・住所のいずれでもよい
+    contact = models.CharField(max_length=100)
     request_date = models.DateTimeField(auto_now_add=True)
     # 受け取った側の回答状況
     status = models.CharField(
@@ -61,6 +67,7 @@ class Offer(models.Model):
             location="",
             message=self.message,
             visibility=visibility,
+            offer=self,
         )
         self.status = self.STATUS_ACCEPTED
         self.save(update_fields=["status"])
