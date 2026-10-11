@@ -1,4 +1,4 @@
-{% load static %}
+{% load static static_version %}
 <!doctype html>
 <html lang="ja">
 <head>
@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Encor{% endblock %} | Encor</title>
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'encor_app/css/style.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static_v 'encor_app/css/style.css' %}" />
     <!-- fullcalendar -->
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.css">
     <script src="https://unpkg.com/@fullcalendar/core/main.js"></script>

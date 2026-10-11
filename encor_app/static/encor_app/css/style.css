@@ -862,6 +862,47 @@ input[type="color"] {
 }
 
 /* =========================================================
+   通知(トースト)
+   ========================================================= */
+.toast {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  max-width: calc(100vw - 32px);
+  padding: 0.7em 1.2em 0.7em 1em;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--pink);
+  border-radius: var(--radius-sm);
+  background-color: var(--card);
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-pop);
+  opacity: 0;
+  transform: translate(-50%, -8px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.toast--show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.toast .material-icons {
+  font-size: 1.3em;
+  color: var(--pink);
+}
+.toast--error {
+  border-left-color: var(--red);
+}
+.toast--error .material-icons {
+  color: var(--red);
+}
+
+/* =========================================================
    レスポンシブ
    ========================================================= */
 @media (max-width: 640px) {

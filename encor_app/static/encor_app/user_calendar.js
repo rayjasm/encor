@@ -219,7 +219,7 @@ const registerEditModalEvent = (modal, arg) => {
   const contact = modal.querySelector("#contact");
   const message = modal.querySelector("#message");
 
-  // 保存
+  // 送信
   const saveButton = modal.querySelector("#save");
   if (saveButton) {
     saveButton.addEventListener("click", (e) => {
@@ -228,38 +228,25 @@ const registerEditModalEvent = (modal, arg) => {
       const eventData = {
         start: start.value,
         end: end.value,
-        name: name.value,
+        name: name.value.trim(),
         color: color.value,
-        contact: contact.value,
-        message: message.value,
+        contact: contact.value.trim(),
+        message: message.value.trim(),
       };
-      console.log("送信するイベントデータ: ", userId, eventData);
 
-      if (arg.event !== undefined) {
-        // 変更時
-        arg.event.setStart(start.value);
-        arg.event.setEnd(end.value);
-        arg.event.setProp("name", name.value);
-        arg.event.setProp("color", color.value);
-        arg.event.setExtendedProp("contact", contact.value);
-        arg.event.setExtendedProp("message", message.value);
-        console.log("if");
-        sendEventToServer(arg.event.id, eventData);
-      } else {
-        // 新規作成時
-        const newEvent = calendar.addEvent({
-          start: start.value,
-          end: end.value,
-          name: name.value,
-          color: color.value,
-          extendedProps: {
-            contact: contact.value,
-            message: message.value,
-          },
-        });
-        console.log(eventData);
-        sendEventToServer(eventData);
+      if (!eventData.name) {
+        showToast("予定の名前を入力してください", "error");
+        name.focus();
+        return;
       }
+      if (!eventData.start || !eventData.end) {
+        showToast("開始時刻と終了時刻を入力してください", "error");
+        return;
+      }
+
+      // 承諾されるまではカレンダーに表示しない(仮表示もしない)。
+      // 送信結果は画面上部の通知で伝える
+      sendOffer(eventData);
 
       calendar.unselect();
       modal.remove();
@@ -353,35 +340,44 @@ function convertISOToDatetimeLocal(isoString) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-// イベント登録リクエストの送信
-const sendEventToServer = (eventData) => {
-  const url = `/api/offers/${userId}/`;
-
-  console.log("sendEventToServer.eventData: ", eventData);
-
-  const payload = {
-    start: eventData.start,
-    end: eventData.end,
-    name: eventData.name,
-    color: eventData.color,
-    contact: eventData.contact,
-    message: eventData.message,
-  };
-
-  const axiosConfig = {
-    method: "POST",
-    url: url,
-    data: payload,
-  };
-
-  axios(axiosConfig)
+// リクエストの送信
+const sendOffer = (eventData) => {
+  return axios
+    .post(`/api/offers/${userId}/`, eventData)
     .then((response) => {
-      console.log("イベントが送信されました:", response.data);
+      console.log("リクエストを送信しました:", response.data);
+      showToast(
+        "リクエストを送信しました。承諾されるとカレンダーに表示されます",
+        "success"
+      );
     })
     .catch((error) => {
       console.error(
-        "イベント送信エラー:",
+        "リクエスト送信エラー:",
         error.response ? error.response.data : error
       );
+      showToast("送信に失敗しました。時間をおいて再度お試しください", "error");
     });
+};
+
+// 画面上部に数秒だけ表示する通知
+let toastTimer = null;
+const showToast = (message, type = "success") => {
+  let toast = document.getElementById("toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast";
+    toast.setAttribute("role", "status");
+    document.body.appendChild(toast);
+  }
+  toast.className = `toast toast--${type}`;
+  toast.innerHTML =
+    `<span class="material-icons" aria-hidden="true">` +
+    (type === "success" ? "check_circle" : "error") +
+    `</span><span class="toast__text"></span>`;
+  toast.querySelector(".toast__text").textContent = message;
+
+  clearTimeout(toastTimer);
+  requestAnimationFrame(() => toast.classList.add("toast--show"));
+  toastTimer = setTimeout(() => toast.classList.remove("toast--show"), 4500);
 };

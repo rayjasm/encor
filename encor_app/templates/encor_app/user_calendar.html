@@ -2,7 +2,7 @@
 
 {% block title %}{{ user.username }} さんのカレンダー{% endblock %}
 
-{% load static %}
+{% load static_version %}
 
 {% block content %}
     <div class="page-title">
@@ -21,7 +21,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.js"></script>
-    <script src="{% static 'encor_app/user_calendar.js' %}"></script>
+    <script src="{% static_v 'encor_app/user_calendar.js' %}"></script>
 
     <!-- リクエスト送信モーダル -->
     <div class="cmodal" id="modal-template">
